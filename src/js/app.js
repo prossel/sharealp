@@ -9,70 +9,50 @@ const App = (() => {
   function render() {
     const state = Store.get();
     document.getElementById('app').innerHTML =
+      UI.renderSettings(state) +
       UI.renderParticipants(state) +
-      UI.renderVehicles(state) +
-      UI.renderTrips(state) +
       UI.renderResults(state);
+  }
+
+  // ── Course settings ────────────────────────────────────
+  function saveSettings() {
+    const km = parseFloat(document.getElementById('input-km').value) || 0;
+    const fuelCostPerKm = parseFloat(document.getElementById('input-rate').value) || 0;
+    const state = Store.get();
+    state.km = km;
+    state.fuelCostPerKm = fuelCostPerKm;
+    Store.set(state);
+    render();
   }
 
   // ── Participants ───────────────────────────────────────
   function addParticipant() {
-    const input = document.getElementById('input-participant-name');
-    const name = input.value.trim();
+    const nameInput = document.getElementById('input-participant-name');
+    const name = nameInput.value.trim();
     if (!name) return;
+    const role = document.getElementById('input-participant-role').value;
+    const isLeader = document.getElementById('input-participant-leader').checked;
     const state = Store.get();
-    state.participants.push({ id: Transport.uid(), name });
+    state.lastRole = role;
+    state.participants.push({ id: Transport.uid(), name, isLeader, role });
     Store.set(state);
     render();
+    // Return focus to name field and clear it for the next entry
+    const nextInput = document.getElementById('input-participant-name');
+    if (nextInput) { nextInput.value = ''; nextInput.focus(); }
   }
 
   function removeParticipant(id) {
     const state = Store.get();
     state.participants = state.participants.filter(p => p.id !== id);
-    // Cascade: remove vehicles and trips that referenced this participant
-    state.vehicles = state.vehicles.filter(v => v.ownerId !== id);
-    state.trips = state.trips
-      .map(t => ({ ...t, passengerIds: t.passengerIds.filter(pid => pid !== id) }))
-      .filter(t => state.vehicles.some(v => v.id === t.vehicleId));
     Store.set(state);
     render();
   }
 
-  // ── Vehicles ───────────────────────────────────────────
-  function addVehicle() {
-    const ownerId = document.getElementById('input-vehicle-owner').value;
-    const description = document.getElementById('input-vehicle-desc').value.trim();
-    const km = parseFloat(document.getElementById('input-vehicle-km').value) || 0;
-    const fuelCostPerKm = parseFloat(document.getElementById('input-vehicle-cost').value) || 0;
-    if (!ownerId) return;
+  function updateParticipant(id, field, value) {
     const state = Store.get();
-    state.vehicles.push({ id: Transport.uid(), ownerId, description, km, fuelCostPerKm });
-    Store.set(state);
-    render();
-  }
-
-  function removeVehicle(id) {
-    const state = Store.get();
-    state.vehicles = state.vehicles.filter(v => v.id !== id);
-    state.trips = state.trips.filter(t => t.vehicleId !== id);
-    Store.set(state);
-    render();
-  }
-
-  // ── Trips ──────────────────────────────────────────────
-  function addTrip() {
-    const vehicleId = document.getElementById('input-trip-vehicle').value;
-    const passengerIds = [...document.getElementById('input-trip-passengers').selectedOptions].map(o => o.value);
-    if (!vehicleId) return;
-    const state = Store.get();
-    state.trips.push({ id: Transport.uid(), vehicleId, passengerIds });
-    Store.set(state);
-    render();
-  }
-
-  function removeTrip(id) {
-    const state = Store.get();
-    state.trips = state.trips.filter(t => t.id !== id);
+    const p = state.participants.find(p => p.id === id);
+    if (p) p[field] = value;
     Store.set(state);
     render();
   }
@@ -87,5 +67,5 @@ const App = (() => {
   // Bootstrap
   document.addEventListener('DOMContentLoaded', render);
 
-  return { addParticipant, removeParticipant, addVehicle, removeVehicle, addTrip, removeTrip, reset };
+  return { saveSettings, addParticipant, removeParticipant, updateParticipant, reset };
 })();

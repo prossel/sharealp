@@ -1,43 +1,57 @@
 /**
  * transport.js – Pure calculation logic (no DOM, no side-effects).
  *
- * Cost model:
- *   Each vehicle trip has a total cost = km × fuelCostPerKm.
- *   That cost is split equally between the driver and all passengers.
- *   The driver "pays" their share via the car; passengers owe the driver.
+ * All cars do the same km at the same CHF/km rate:
+ *   costPerCar = km × fuelCostPerKm
+ *   totalCost  = N_drivers × costPerCar
  *
- * Result: a map of participantId → net balance (positive = to receive, negative = to pay).
+ * Two pools (split proportionally to voyager counts):
+ *   costPerVoyager = totalCost / N_allVoyagers
+ *   L = N_leaderVoyagers  × costPerVoyager  → paid equally by ALL non-leaders
+ *   V = N_nonLeaderVoyagers × costPerVoyager → paid equally by non-leader voyageurs
+ *
+ * "Voyageur" = anyone with role 'driver' or 'passenger'.
+ * Each driver is reimbursed costPerCar (same for everyone).
+ * Leaders pay nothing.
  */
 const Transport = (() => {
 
   /**
    * @param {object} state - full Store state
-   * @returns {Map<string, number>} participantId → net balance in CHF
+   * @returns {object} participantId → net balance in CHF
    */
   function computeBalances(state) {
-    const { participants, vehicles, trips } = state;
+    const { km, fuelCostPerKm, participants } = state;
+    const costPerCar = km * fuelCostPerKm;
 
-    const vehicleMap = Object.fromEntries(vehicles.map(v => [v.id, v]));
     const balances = Object.fromEntries(participants.map(p => [p.id, 0]));
 
-    for (const trip of trips) {
-      const vehicle = vehicleMap[trip.vehicleId];
-      if (!vehicle) continue;
+    const drivers           = participants.filter(p =>  p.role === 'driver');
+    const leaderVoyagers    = participants.filter(p =>  p.isLeader && (p.role === 'driver' || p.role === 'passenger'));
+    const nonLeaderVoyagers = participants.filter(p => !p.isLeader && (p.role === 'driver' || p.role === 'passenger'));
+    const nonLeaders        = participants.filter(p => !p.isLeader);
 
-      const occupants = [vehicle.ownerId, ...trip.passengerIds];
-      const uniqueOccupants = [...new Set(occupants)];
-      const totalCost = vehicle.km * vehicle.fuelCostPerKm;
-      const share = totalCost / uniqueOccupants.length;
+    const totalCost = drivers.length * costPerCar;
+    const allVoyagers = leaderVoyagers.length + nonLeaderVoyagers.length;
+    const costPerVoyager = allVoyagers > 0 ? totalCost / allVoyagers : 0;
 
-      for (const id of uniqueOccupants) {
-        if (id === vehicle.ownerId) {
-          // Driver already paid → receives from others
-          balances[id] = (balances[id] ?? 0) + totalCost - share;
-        } else {
-          // Passenger owes their share
-          balances[id] = (balances[id] ?? 0) - share;
-        }
-      }
+    const L = leaderVoyagers.length * costPerVoyager;
+    const V = nonLeaderVoyagers.length * costPerVoyager; // = nonLeaderVoyagers.length × costPerVoyager
+
+    // All non-leaders pay their share of L
+    if (nonLeaders.length > 0 && L > 0) {
+      const share = L / nonLeaders.length;
+      for (const p of nonLeaders) balances[p.id] -= share;
+    }
+
+    // Non-leader voyageurs additionally pay their share of V (= costPerVoyager each)
+    if (nonLeaderVoyagers.length > 0 && V > 0) {
+      for (const p of nonLeaderVoyagers) balances[p.id] -= costPerVoyager;
+    }
+
+    // Each driver is reimbursed costPerCar (same amount for all drivers)
+    for (const p of drivers) {
+      balances[p.id] += costPerCar;
     }
 
     return balances;
@@ -83,5 +97,30 @@ const Transport = (() => {
     return Math.random().toString(36).slice(2, 9);
   }
 
-  return { computeBalances, computeTransfers, uid };
+  /**
+   * Returns the intermediate cost values for display purposes.
+   * @param {object} state
+   * @returns {{ costPerCar, costPerVoyager, L, V }}
+   */
+  function computeSummary(state) {
+    const { km, fuelCostPerKm, participants } = state;
+    const costPerCar = km * fuelCostPerKm;
+
+    const drivers           = participants.filter(p =>  p.role === 'driver');
+    const leaderVoyagers    = participants.filter(p =>  p.isLeader && (p.role === 'driver' || p.role === 'passenger'));
+    const nonLeaderVoyagers = participants.filter(p => !p.isLeader && (p.role === 'driver' || p.role === 'passenger'));
+
+    const totalCost = drivers.length * costPerCar;
+    const allVoyagers = leaderVoyagers.length + nonLeaderVoyagers.length;
+    const costPerVoyager = allVoyagers > 0 ? totalCost / allVoyagers : 0;
+
+    return {
+      costPerCar,
+      costPerVoyager,
+      L: leaderVoyagers.length * costPerVoyager,
+      V: nonLeaderVoyagers.length * costPerVoyager,
+    };
+  }
+
+  return { computeBalances, computeTransfers, computeSummary, uid };
 })();

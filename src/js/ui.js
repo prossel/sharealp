@@ -5,15 +5,58 @@
  */
 const UI = (() => {
 
+  const ROLES = [
+    { value: 'driver',      label: 'Conducteur'   },
+    { value: 'passenger',   label: 'Passager'      },
+    { value: 'independent', label: 'Indépendant'   },
+  ];
+
+  function renderSettings(state) {
+    return `
+      <section id="section-settings">
+        <h2>Course</h2>
+        <div class="form-row">
+          <div class="field">
+            <label for="input-km">Kilomètres totaux</label>
+            <input id="input-km" type="number" min="0" value="${state.km}" />
+          </div>
+          <div class="field">
+            <label for="input-rate">CHF/km</label>
+            <input id="input-rate" type="number" min="0" step="0.01" value="${state.fuelCostPerKm}" />
+          </div>
+          <div class="field" style="flex:0;align-self:flex-end">
+            <button class="btn-secondary" onclick="App.saveSettings()">Enregistrer</button>
+          </div>
+        </div>
+        <p style="margin-top:0.5rem;font-size:0.85rem;color:#666">
+          Coût par voiture : <strong>${(state.km * state.fuelCostPerKm).toFixed(2)} CHF</strong>
+        </p>
+      </section>`;
+  }
+
   function renderParticipants(state) {
-    const { participants } = state;
+    const { participants, lastRole } = state;
+    const roleOptions = (selected) => ROLES.map(r =>
+      `<option value="${r.value}"${r.value === selected ? ' selected' : ''}>${r.label}</option>`
+    ).join('');
     return `
       <section id="section-participants">
         <h2>Participants</h2>
         <div class="form-row">
           <div class="field">
             <label for="input-participant-name">Nom</label>
-            <input id="input-participant-name" type="text" placeholder="ex. Alice" />
+            <input id="input-participant-name" type="text" placeholder="ex. Alice"
+              onkeydown="if(event.key==='Enter') App.addParticipant()" />
+          </div>
+          <div class="field">
+            <label for="input-participant-role">Rôle</label>
+            <select id="input-participant-role">${roleOptions(lastRole)}</select>
+          </div>
+          <div class="field" style="flex:0;align-self:center;padding-top:1.25rem">
+            <label style="display:flex;align-items:center;gap:0.4rem;white-space:nowrap">
+              <input id="input-participant-leader" type="checkbox" />
+              Chef de course
+            </label>
           </div>
           <div class="field" style="flex:0;align-self:flex-end">
             <button class="btn-primary" onclick="App.addParticipant()">Ajouter</button>
@@ -21,107 +64,23 @@ const UI = (() => {
         </div>
         ${participants.length ? `
         <table style="margin-top:1rem">
-          <thead><tr><th>Nom</th><th></th></tr></thead>
+          <thead><tr><th>Nom</th><th>Rôle</th><th>Chef ★</th><th></th></tr></thead>
           <tbody>
             ${participants.map(p => `
               <tr>
                 <td>${escHtml(p.name)}</td>
+                <td>
+                  <select onchange="App.updateParticipant('${p.id}', 'role', this.value)">
+                    ${roleOptions(p.role)}
+                  </select>
+                </td>
+                <td style="text-align:center">
+                  <input type="checkbox" ${p.isLeader ? 'checked' : ''}
+                    onchange="App.updateParticipant('${p.id}', 'isLeader', this.checked)" />
+                </td>
                 <td><button class="btn-danger" onclick="App.removeParticipant('${p.id}')">✕</button></td>
               </tr>
             `).join('')}
-          </tbody>
-        </table>` : ''}
-      </section>`;
-  }
-
-  function renderVehicles(state) {
-    const { participants, vehicles } = state;
-    if (!participants.length) return '';
-    const options = participants.map(p => `<option value="${p.id}">${escHtml(p.name)}</option>`).join('');
-    return `
-      <section id="section-vehicles">
-        <h2>Véhicules</h2>
-        <div class="form-row">
-          <div class="field">
-            <label>Conducteur</label>
-            <select id="input-vehicle-owner">${options}</select>
-          </div>
-          <div class="field">
-            <label>Description (optionnel)</label>
-            <input id="input-vehicle-desc" type="text" placeholder="ex. VW Golf" />
-          </div>
-          <div class="field">
-            <label>km totaux</label>
-            <input id="input-vehicle-km" type="number" min="0" value="0" />
-          </div>
-          <div class="field">
-            <label>CHF/km</label>
-            <input id="input-vehicle-cost" type="number" min="0" step="0.01" value="0.70" />
-          </div>
-          <div class="field" style="flex:0;align-self:flex-end">
-            <button class="btn-primary" onclick="App.addVehicle()">Ajouter</button>
-          </div>
-        </div>
-        ${vehicles.length ? `
-        <table style="margin-top:1rem">
-          <thead><tr><th>Conducteur</th><th>Description</th><th>km</th><th>CHF/km</th><th>Coût</th><th></th></tr></thead>
-          <tbody>
-            ${vehicles.map(v => {
-              const owner = participants.find(p => p.id === v.ownerId);
-              const cost = (v.km * v.fuelCostPerKm).toFixed(2);
-              return `<tr>
-                <td>${escHtml(owner?.name ?? '?')}</td>
-                <td>${escHtml(v.description)}</td>
-                <td>${v.km}</td>
-                <td>${v.fuelCostPerKm}</td>
-                <td>${cost} CHF</td>
-                <td><button class="btn-danger" onclick="App.removeVehicle('${v.id}')">✕</button></td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>` : ''}
-      </section>`;
-  }
-
-  function renderTrips(state) {
-    const { participants, vehicles, trips } = state;
-    if (!vehicles.length) return '';
-    const vehicleOptions = vehicles.map(v => {
-      const owner = participants.find(p => p.id === v.ownerId);
-      return `<option value="${v.id}">${escHtml(owner?.name ?? '?')} – ${escHtml(v.description)}</option>`;
-    }).join('');
-    return `
-      <section id="section-trips">
-        <h2>Trajets</h2>
-        <div class="form-row">
-          <div class="field">
-            <label>Véhicule</label>
-            <select id="input-trip-vehicle">${vehicleOptions}</select>
-          </div>
-          <div class="field">
-            <label>Passagers</label>
-            <select id="input-trip-passengers" multiple size="4">
-              ${participants.map(p => `<option value="${p.id}">${escHtml(p.name)}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field" style="flex:0;align-self:flex-end">
-            <button class="btn-primary" onclick="App.addTrip()">Ajouter trajet</button>
-          </div>
-        </div>
-        ${trips.length ? `
-        <table style="margin-top:1rem">
-          <thead><tr><th>Véhicule</th><th>Passagers</th><th></th></tr></thead>
-          <tbody>
-            ${trips.map(t => {
-              const vehicle = vehicles.find(v => v.id === t.vehicleId);
-              const owner = participants.find(p => p.id === vehicle?.ownerId);
-              const passengers = t.passengerIds.map(id => participants.find(p => p.id === id)?.name ?? '?');
-              return `<tr>
-                <td>${escHtml(owner?.name ?? '?')} – ${escHtml(vehicle?.description ?? '')}</td>
-                <td>${passengers.map(escHtml).join(', ')}</td>
-                <td><button class="btn-danger" onclick="App.removeTrip('${t.id}')">✕</button></td>
-              </tr>`;
-            }).join('')}
           </tbody>
         </table>` : ''}
       </section>`;
@@ -133,20 +92,31 @@ const UI = (() => {
 
     const balances = Transport.computeBalances(state);
     const transfers = Transport.computeTransfers(balances);
+    const { costPerCar, costPerVoyager, L, V } = Transport.computeSummary(state);
     const nameOf = id => participants.find(p => p.id === id)?.name ?? id;
 
     return `
       <section id="section-results">
         <h2>Résultats</h2>
+        <table style="margin-bottom:1rem">
+          <tbody>
+            <tr><td style="color:#555;font-size:0.85rem">Coût par voiture</td><td><strong>${costPerCar.toFixed(2)} CHF</strong></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Coût par place (siège)</td><td><strong>${costPerVoyager.toFixed(2)} CHF</strong></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Part chefs de course (L)</td><td><strong>${L.toFixed(2)} CHF</strong></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Part voyageurs non-chefs (V)</td><td><strong>${V.toFixed(2)} CHF</strong></td></tr>
+          </tbody>
+        </table>
         <table>
-          <thead><tr><th>Participant</th><th>Solde</th></tr></thead>
+          <thead><tr><th>Participant</th><th>Rôle</th><th>Solde</th></tr></thead>
           <tbody>
             ${participants.map(p => {
               const b = balances[p.id] ?? 0;
               const cls = b >= 0 ? 'result-positive' : 'result-negative';
               const sign = b >= 0 ? '+' : '';
+              const roleLabel = ROLES.find(r => r.value === p.role)?.label ?? p.role;
               return `<tr>
-                <td>${escHtml(p.name)}</td>
+                <td>${escHtml(p.name)}${p.isLeader ? ' ★' : ''}</td>
+                <td style="font-size:0.85rem;color:#666">${roleLabel}</td>
                 <td class="${cls}">${sign}${b.toFixed(2)} CHF</td>
               </tr>`;
             }).join('')}
@@ -180,5 +150,5 @@ const UI = (() => {
       .replace(/"/g, '&quot;');
   }
 
-  return { renderParticipants, renderVehicles, renderTrips, renderResults };
+  return { renderSettings, renderParticipants, renderResults };
 })();

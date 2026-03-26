@@ -8,9 +8,11 @@ const Store = (() => {
   const KEY = 'cas-transport-state';
 
   const defaults = {
-    participants: [],   // [{ id, name }]
-    vehicles: [],       // [{ id, ownerId, description, km, fuelCostPerKm }]
-    trips: [],          // [{ id, vehicleId, passengerIds }]
+    km: 0,
+    fuelCostPerKm: 0.70,
+    lastRole: 'passenger',  // sticky default for the add form
+    participants: [],        // [{ id, name, isLeader, role }]
+                             // role: 'driver' | 'passenger' | 'independent'
   };
 
   function get() {
