@@ -28,6 +28,9 @@ const UI = (() => {
           <div class="field" style="flex:0;align-self:flex-end">
             <button class="btn-secondary" onclick="App.saveSettings()">Enregistrer</button>
           </div>
+          <div class="field" style="flex:0;align-self:flex-end">
+            <button id="btn-share" class="btn-secondary" onclick="App.share()">🔗 Partager</button>
+          </div>
         </div>
         <p style="margin-top:0.5rem;font-size:0.85rem;color:#666">
           Coût par voiture : <strong>${(state.km * state.fuelCostPerKm).toFixed(2)} CHF</strong>
@@ -141,8 +144,9 @@ const UI = (() => {
             `).join('')}
           </tbody>
         </table>` : '<p style="margin-top:0.75rem;color:#555">Aucun virement nécessaire.</p>'}
-        <div style="margin-top:1rem">
+        <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
           <button class="btn-secondary" onclick="App.reset()">Réinitialiser</button>
+          <button class="btn-primary" onclick="App.share()">🔗 Partager les résultats</button>
         </div>
       </section>`;
   }

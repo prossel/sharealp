@@ -31,5 +31,17 @@ const Store = (() => {
     localStorage.removeItem(KEY);
   }
 
-  return { get, set, reset, defaults };
+  function serialize(state) {
+    try {
+      return btoa(encodeURIComponent(JSON.stringify(state)));
+    } catch { return ''; }
+  }
+
+  function deserialize(str) {
+    try {
+      return JSON.parse(decodeURIComponent(atob(str)));
+    } catch { return null; }
+  }
+
+  return { get, set, reset, serialize, deserialize, defaults };
 })();

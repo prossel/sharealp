@@ -12,6 +12,12 @@ const App = (() => {
       UI.renderSettings(state) +
       UI.renderParticipants(state) +
       UI.renderResults(state);
+    syncUrl(state);
+  }
+
+  function syncUrl(state) {
+    const encoded = Store.serialize(state);
+    if (encoded) history.replaceState(null, '', '?s=' + encoded);
   }
 
   // ── Course settings ────────────────────────────────────
@@ -57,6 +63,25 @@ const App = (() => {
     render();
   }
 
+  // ── Share ──────────────────────────────────────────────
+  function share() {
+    const url = location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'CAS Transport', url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('btn-share');
+        if (!btn) return;
+        const original = btn.textContent;
+        btn.textContent = '✓ Lien copié !';
+        btn.disabled = true;
+        setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
+      }).catch(() => {
+        prompt('Copiez ce lien :', url);
+      });
+    }
+  }
+
   // ── Reset ──────────────────────────────────────────────
   function reset() {
     if (!confirm('Réinitialiser toutes les données ?')) return;
@@ -64,8 +89,15 @@ const App = (() => {
     render();
   }
 
-  // Bootstrap
-  document.addEventListener('DOMContentLoaded', render);
+  // Bootstrap — load from URL ?s= if present, else localStorage
+  document.addEventListener('DOMContentLoaded', () => {
+    const param = new URLSearchParams(location.search).get('s');
+    if (param) {
+      const state = Store.deserialize(param);
+      if (state) Store.set(state);
+    }
+    render();
+  });
 
-  return { saveSettings, addParticipant, removeParticipant, updateParticipant, reset };
+  return { saveSettings, addParticipant, removeParticipant, updateParticipant, reset, share };
 })();
