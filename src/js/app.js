@@ -42,9 +42,9 @@ const App = (() => {
   function addVehicle() {
     const ownerId = document.getElementById('input-vehicle-owner').value;
     const description = document.getElementById('input-vehicle-desc').value.trim();
-    const km = parseFloat(document.getElementById('input-vehicle-km').value);
-    const fuelCostPerKm = parseFloat(document.getElementById('input-vehicle-cost').value);
-    if (!ownerId || isNaN(km) || isNaN(fuelCostPerKm)) return;
+    const km = parseFloat(document.getElementById('input-vehicle-km').value) || 0;
+    const fuelCostPerKm = parseFloat(document.getElementById('input-vehicle-cost').value) || 0;
+    if (!ownerId) return;
     const state = Store.get();
     state.vehicles.push({ id: Transport.uid(), ownerId, description, km, fuelCostPerKm });
     Store.set(state);

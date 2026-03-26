@@ -52,11 +52,11 @@ const UI = (() => {
           </div>
           <div class="field">
             <label>km totaux</label>
-            <input id="input-vehicle-km" type="number" min="0" placeholder="0" />
+            <input id="input-vehicle-km" type="number" min="0" value="0" />
           </div>
           <div class="field">
             <label>CHF/km</label>
-            <input id="input-vehicle-cost" type="number" min="0" step="0.01" placeholder="0.70" />
+            <input id="input-vehicle-cost" type="number" min="0" step="0.01" value="0.70" />
           </div>
           <div class="field" style="flex:0;align-self:flex-end">
             <button class="btn-primary" onclick="App.addVehicle()">Ajouter</button>
