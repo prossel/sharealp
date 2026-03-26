@@ -6,10 +6,11 @@
 const UI = (() => {
 
   const ROLES = [
-    { value: 'driver',      label: 'Conducteur'   },
-    { value: 'passenger',   label: 'Passager'      },
-    { value: 'independent', label: 'Indépendant'   },
+    { value: 'driver',      label: 'Conducteur',   icon: '🚗' },
+    { value: 'passenger',   label: 'Passager',      icon: '💺' },
+    { value: 'independent', label: 'Indépendant',   icon: '🚶' },
   ];
+  const ROLE_ORDER = Object.fromEntries(ROLES.map((r, i) => [r.value, i]));
 
   function renderSettings(state) {
     return `
@@ -37,7 +38,7 @@ const UI = (() => {
   function renderParticipants(state) {
     const { participants, lastRole } = state;
     const roleOptions = (selected) => ROLES.map(r =>
-      `<option value="${r.value}"${r.value === selected ? ' selected' : ''}>${r.label}</option>`
+      `<option value="${r.value}"${r.value === selected ? ' selected' : ''}>${r.icon} ${r.label}</option>`
     ).join('');
     return `
       <section id="section-participants">
@@ -95,6 +96,9 @@ const UI = (() => {
     const { costPerCar, costPerVoyager, L, V } = Transport.computeSummary(state);
     const nameOf = id => participants.find(p => p.id === id)?.name ?? id;
 
+    const sorted = [...participants].sort((a, b) =>
+      (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99)
+    );
     return `
       <section id="section-results">
         <h2>Résultats</h2>
@@ -109,11 +113,12 @@ const UI = (() => {
         <table>
           <thead><tr><th>Participant</th><th>Rôle</th><th>Solde</th></tr></thead>
           <tbody>
-            ${participants.map(p => {
+            ${sorted.map(p => {
               const b = balances[p.id] ?? 0;
               const cls = b >= 0 ? 'result-positive' : 'result-negative';
               const sign = b >= 0 ? '+' : '';
-              const roleLabel = ROLES.find(r => r.value === p.role)?.label ?? p.role;
+              const role = ROLES.find(r => r.value === p.role);
+              const roleLabel = role ? `${role.icon} ${role.label}` : p.role;
               return `<tr>
                 <td>${escHtml(p.name)}${p.isLeader ? ' ★' : ''}</td>
                 <td style="font-size:0.85rem;color:#666">${roleLabel}</td>
