@@ -12,7 +12,8 @@ const Store = (() => {
 
   const defaults = {
     km: 0,
-    fuelCostPerKm: 0.70,
+    fuelCostPerKm: 0.50,
+    description: '',         // course description (max 32 chars)
     lastRole: 'passenger',  // sticky default for the add form
     participants: [],        // [{ id, name, isLeader, role }]
                              // role: 'driver' | 'passenger' | 'independent'
@@ -38,7 +39,7 @@ const Store = (() => {
     localStorage.removeItem(KEY);
   }
 
-  // Compact format: [km, fuelCostPerKm, [[name, isLeader01, roleIdx], ...]]
+  // Compact format: [km, fuelCostPerKm, description, [[name, isLeader01, roleIdx], ...]]
   // - lastRole and participant IDs are not stored (not useful for recipient)
   // - UTF-8 safe via unescape(encodeURIComponent(...)) before btoa
   // - Base64url (no +, /, = chars) so no URL-encoding needed
@@ -47,6 +48,7 @@ const Store = (() => {
       const compact = [
         state.km,
         state.fuelCostPerKm,
+        state.description ?? '',
         state.participants.map(p => [
           p.name,
           p.isLeader ? 1 : 0,
@@ -62,12 +64,17 @@ const Store = (() => {
     try {
       const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
       const json = decodeURIComponent(escape(atob(b64)));
-      const [km, fuelCostPerKm, parts] = JSON.parse(json);
+      const [km, fuelCostPerKm, descOrParts, maybeParts] = JSON.parse(json);
+      // Backward compat: old format has participants at index 2 (array of arrays)
+      const isOldFormat = Array.isArray(descOrParts);
+      const description = isOldFormat ? '' : (descOrParts ?? '');
+      const parts = isOldFormat ? descOrParts : (maybeParts ?? []);
       return {
         km: km ?? 0,
         fuelCostPerKm: fuelCostPerKm ?? defaults.fuelCostPerKm,
+        description,
         lastRole: defaults.lastRole,
-        participants: (parts ?? []).map(([name, isLeader, roleIdx]) => ({
+        participants: parts.map(([name, isLeader, roleIdx]) => ({
           id: uid(),
           name,
           isLeader: !!isLeader,

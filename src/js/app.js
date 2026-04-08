@@ -12,6 +12,9 @@ const App = (() => {
       UI.renderSettings(state) +
       UI.renderParticipants(state) +
       UI.renderResults(state);
+    document.title = state.description
+      ? `${state.description} - Frais de déplacement`
+      : 'CAS Transport – Répartition des frais';
     syncUrl(state);
   }
 
@@ -21,12 +24,9 @@ const App = (() => {
   }
 
   // ── Course settings ────────────────────────────────────
-  function saveSettings() {
-    const km = parseFloat(document.getElementById('input-km').value) || 0;
-    const fuelCostPerKm = parseFloat(document.getElementById('input-rate').value) || 0;
+  function updateSetting(field, value) {
     const state = Store.get();
-    state.km = km;
-    state.fuelCostPerKm = fuelCostPerKm;
+    state[field] = value;
     Store.set(state);
     render();
   }
@@ -99,5 +99,5 @@ const App = (() => {
     render();
   });
 
-  return { saveSettings, addParticipant, removeParticipant, updateParticipant, reset, share };
+  return { updateSetting, addParticipant, removeParticipant, updateParticipant, reset, share };
 })();

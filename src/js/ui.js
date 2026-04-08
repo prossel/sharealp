@@ -18,18 +18,20 @@ const UI = (() => {
         <h2>Course</h2>
         <div class="form-row">
           <div class="field">
+            <label for="input-description">Description</label>
+            <input id="input-description" type="text" maxlength="32"
+              value="${escHtml(state.description ?? '')}"
+              onchange="App.updateSetting('description', this.value)" />
+          </div>
+          <div class="field">
             <label for="input-km">Kilomètres totaux</label>
-            <input id="input-km" type="number" min="0" value="${state.km}" />
+            <input id="input-km" type="number" min="0" value="${state.km}"
+              onchange="App.updateSetting('km', parseFloat(this.value) || 0)" />
           </div>
           <div class="field">
             <label for="input-rate">CHF/km</label>
-            <input id="input-rate" type="number" min="0" step="0.01" value="${state.fuelCostPerKm}" />
-          </div>
-          <div class="field" style="flex:0;align-self:flex-end">
-            <button class="btn-secondary" onclick="App.saveSettings()">Enregistrer</button>
-          </div>
-          <div class="field" style="flex:0;align-self:flex-end">
-            <button id="btn-share" class="btn-secondary" onclick="App.share()">🔗 Partager</button>
+            <input id="input-rate" type="number" min="0" step="0.01" value="${state.fuelCostPerKm}"
+              onchange="App.updateSetting('fuelCostPerKm', parseFloat(this.value) || 0)" />
           </div>
         </div>
         <p style="margin-top:0.5rem;font-size:0.85rem;color:#666">
@@ -105,6 +107,7 @@ const UI = (() => {
     return `
       <section id="section-results">
         <h2>Résultats</h2>
+        ${state.description ? `<p style="margin-top:0;margin-bottom:1rem;font-weight:600">${escHtml(state.description)}</p>` : ''}
         <table style="margin-bottom:1rem">
           <tbody>
             <tr><td style="color:#555;font-size:0.85rem">Coût par voiture</td><td><strong>${costPerCar.toFixed(2)} CHF</strong></td></tr>
@@ -146,7 +149,7 @@ const UI = (() => {
         </table>` : '<p style="margin-top:0.75rem;color:#555">Aucun virement nécessaire.</p>'}
         <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
           <button class="btn-secondary" onclick="App.reset()">Réinitialiser</button>
-          <button class="btn-primary" onclick="App.share()">🔗 Partager les résultats</button>
+          <button id="btn-share" class="btn-primary" onclick="App.share()">🔗 Partager les résultats</button>
         </div>
       </section>`;
   }
