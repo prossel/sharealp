@@ -12,6 +12,14 @@ const UI = (() => {
   ];
   const ROLE_ORDER = Object.fromEntries(ROLES.map((r, i) => [r.value, i]));
 
+  function sortParticipants(list) {
+    return [...list].sort((a, b) => {
+      const roleDiff = (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99);
+      if (roleDiff !== 0) return roleDiff;
+      return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+    });
+  }
+
   function renderSettings(state) {
     return `
       <section id="section-settings">
@@ -72,7 +80,7 @@ const UI = (() => {
         <table style="margin-top:1rem">
           <thead><tr><th>Nom</th><th>Rôle</th><th>Chef ★</th><th></th></tr></thead>
           <tbody>
-            ${participants.map(p => `
+            ${sortParticipants(participants).map(p => `
               <tr>
                 <td>${escHtml(p.name)}</td>
                 <td>
@@ -101,9 +109,7 @@ const UI = (() => {
     const { costPerCar, costPerVoyager, L, V } = Transport.computeSummary(state);
     const nameOf = id => participants.find(p => p.id === id)?.name ?? id;
 
-    const sorted = [...participants].sort((a, b) =>
-      (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99)
-    );
+    const sorted = sortParticipants(participants);
     return `
       <section id="section-results">
         <h2>Résultats</h2>
