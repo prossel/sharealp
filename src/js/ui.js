@@ -106,7 +106,7 @@ const UI = (() => {
 
     const balances = Transport.computeBalances(state);
     const transfers = Transport.computeTransfers(balances);
-    const { costPerCar, costPerVoyager, L, V } = Transport.computeSummary(state);
+    const { costPerCar, costPerVoyager, nNonLeaderVoyagers, nNonLeaders, shareL, L, V } = Transport.computeSummary(state);
     const nameOf = id => participants.find(p => p.id === id)?.name ?? id;
 
     const sorted = sortParticipants(participants);
@@ -118,8 +118,8 @@ const UI = (() => {
           <tbody>
             <tr><td style="color:#555;font-size:0.85rem">Coût par voiture</td><td><strong>${costPerCar.toFixed(2)} CHF</strong></td></tr>
             <tr><td style="color:#555;font-size:0.85rem">Coût par place (siège)</td><td><strong>${costPerVoyager.toFixed(2)} CHF</strong></td></tr>
-            <tr><td style="color:#555;font-size:0.85rem">Part chefs de course (L)</td><td><strong>${L.toFixed(2)} CHF</strong></td></tr>
-            <tr><td style="color:#555;font-size:0.85rem">Part voyageurs non-chefs (V)</td><td><strong>${V.toFixed(2)} CHF</strong></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Part chefs de course (L)</td><td><strong>${L.toFixed(2)} CHF</strong> <span style="color:#888;font-size:0.85rem">(${nNonLeaders} × ${shareL.toFixed(2)} CHF)</span></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Part voyageurs non-chefs (V)</td><td><strong>${V.toFixed(2)} CHF</strong> <span style="color:#888;font-size:0.85rem">(${nNonLeaderVoyagers} × ${costPerVoyager.toFixed(2)} CHF)</span></td></tr>
           </tbody>
         </table>
         <table>

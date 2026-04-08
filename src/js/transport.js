@@ -109,16 +109,24 @@ const Transport = (() => {
     const drivers           = participants.filter(p =>  p.role === 'driver');
     const leaderVoyagers    = participants.filter(p =>  p.isLeader && (p.role === 'driver' || p.role === 'passenger'));
     const nonLeaderVoyagers = participants.filter(p => !p.isLeader && (p.role === 'driver' || p.role === 'passenger'));
+    const nonLeaders        = participants.filter(p => !p.isLeader);
 
     const totalCost = drivers.length * costPerCar;
     const allVoyagers = leaderVoyagers.length + nonLeaderVoyagers.length;
     const costPerVoyager = allVoyagers > 0 ? totalCost / allVoyagers : 0;
 
+    const L = leaderVoyagers.length * costPerVoyager;
+    const V = nonLeaderVoyagers.length * costPerVoyager;
+
     return {
       costPerCar,
       costPerVoyager,
-      L: leaderVoyagers.length * costPerVoyager,
-      V: nonLeaderVoyagers.length * costPerVoyager,
+      nLeaderVoyagers: leaderVoyagers.length,
+      nNonLeaderVoyagers: nonLeaderVoyagers.length,
+      nNonLeaders: nonLeaders.length,
+      shareL: nonLeaders.length > 0 ? L / nonLeaders.length : 0,
+      L,
+      V,
     };
   }
 
