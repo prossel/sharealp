@@ -25,21 +25,23 @@ const UI = (() => {
       <section id="section-settings">
         <h2>Course</h2>
         <div class="form-row">
-          <div class="field">
+          <div class="field field--wide">
             <label for="input-description">Description</label>
             <input id="input-description" type="text" maxlength="32"
               value="${escHtml(state.description ?? '')}"
               onchange="App.updateSetting('description', this.value)" />
           </div>
-          <div class="field">
-            <label for="input-km">Kilomètres totaux</label>
-            <input id="input-km" type="number" min="0" value="${state.km}"
-              onchange="App.updateSetting('km', parseFloat(this.value) || 0)" />
-          </div>
-          <div class="field">
-            <label for="input-rate">CHF/km</label>
-            <input id="input-rate" type="number" min="0" step="0.01" value="${state.fuelCostPerKm}"
-              onchange="App.updateSetting('fuelCostPerKm', parseFloat(this.value) || 0)" />
+          <div class="field-group">
+            <div class="field">
+              <label for="input-km">Kilomètres totaux</label>
+              <input id="input-km" type="number" min="0" value="${state.km}"
+                onchange="App.updateSetting('km', parseFloat(this.value) || 0)" />
+            </div>
+            <div class="field">
+              <label for="input-rate">CHF/km</label>
+              <input id="input-rate" type="number" min="0" step="0.01" value="${state.fuelCostPerKm}"
+                onchange="App.updateSetting('fuelCostPerKm', parseFloat(this.value) || 0)" />
+            </div>
           </div>
         </div>
         <p style="margin-top:0.5rem;font-size:0.85rem;color:#666">
@@ -118,8 +120,8 @@ const UI = (() => {
           <tbody>
             <tr><td style="color:#555;font-size:0.85rem">Coût par voiture</td><td><strong>${costPerCar.toFixed(2)} CHF</strong></td></tr>
             <tr><td style="color:#555;font-size:0.85rem">Coût par place (siège)</td><td><strong>${costPerVoyager.toFixed(2)} CHF</strong></td></tr>
-            <tr><td style="color:#555;font-size:0.85rem">Part chefs de course (L)</td><td><strong>${L.toFixed(2)} CHF</strong> <span style="color:#888;font-size:0.85rem">(${nNonLeaders} × ${shareL.toFixed(2)} CHF)</span></td></tr>
-            <tr><td style="color:#555;font-size:0.85rem">Part voyageurs non-chefs (V)</td><td><strong>${V.toFixed(2)} CHF</strong> <span style="color:#888;font-size:0.85rem">(${nNonLeaderVoyagers} × ${costPerVoyager.toFixed(2)} CHF)</span></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Part chefs de course (L)</td><td><strong>${L.toFixed(2)} CHF</strong> <span style="color:#888;font-size:0.85rem">(${nNonLeaders}&nbsp;×&nbsp;${shareL.toFixed(2)}&nbsp;CHF)</span></td></tr>
+            <tr><td style="color:#555;font-size:0.85rem">Part voyageurs non-chefs (V)</td><td><strong>${V.toFixed(2)} CHF</strong> <span style="color:#888;font-size:0.85rem">(${nNonLeaderVoyagers}&nbsp;×&nbsp;${costPerVoyager.toFixed(2)}&nbsp;CHF)</span></td></tr>
           </tbody>
         </table>
         <table>
