@@ -1,4 +1,4 @@
-# CAS Transport
+# ShareAlp
 
 Web app pour répartir les frais de transport d'une course du [Club Alpin Suisse](https://www.sac-cas.ch/) entre les participants.
 

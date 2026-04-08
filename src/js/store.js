@@ -5,7 +5,7 @@
  * All other modules read/write via Store.get() / Store.set().
  */
 const Store = (() => {
-  const KEY = 'cas-transport-state';
+  const KEY = 'sharealp-state';
 
   // Role order matches ROLES array in ui.js — index is stored in URL
   const ROLE_KEYS = ['driver', 'passenger', 'independent'];

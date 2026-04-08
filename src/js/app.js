@@ -14,7 +14,7 @@ const App = (() => {
       UI.renderResults(state);
     document.title = state.description
       ? `${state.description} - Frais de déplacement`
-      : 'CAS Transport – Répartition des frais';
+      : 'ShareAlp – Partage des frais de transport';
     syncUrl(state);
   }
 
@@ -67,7 +67,7 @@ const App = (() => {
   function share() {
     const url = location.href;
     if (navigator.share) {
-      navigator.share({ title: 'CAS Transport', url }).catch(() => {});
+      navigator.share({ title: 'ShareAlp', url }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => {
         const btn = document.getElementById('btn-share');

@@ -1,4 +1,4 @@
-# Copilot Instructions – CAS Transport
+# Copilot Instructions – ShareAlp
 
 ## What this project does
 
