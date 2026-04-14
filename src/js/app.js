@@ -20,7 +20,12 @@ const App = (() => {
 
   function syncUrl(state) {
     const encoded = Store.serialize(state);
-    if (encoded) history.replaceState(null, '', '?s=' + encoded);
+    const defaultEncoded = Store.serialize(Store.defaults);
+    if (encoded && encoded !== defaultEncoded) {
+      history.replaceState(null, '', '?s=' + encoded);
+    } else {
+      history.replaceState(null, '', location.pathname);
+    }
   }
 
   // ── Course settings ────────────────────────────────────
