@@ -11,9 +11,9 @@ body {
 header {
   background: #c0392b;
   color: #fff;
+  display: flex; align-items: center; gap: 1rem; 
   padding: 1rem 1.5rem;
 }
-
 header .subtitle { font-size: 0.9rem; opacity: 0.85; }
 
 main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }

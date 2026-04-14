@@ -13,7 +13,7 @@ const App = (() => {
       UI.renderParticipants(state) +
       UI.renderResults(state);
     document.title = state.description
-      ? `${state.description} - Frais de déplacement`
+      ? `${state.description} - ShareAlp – Partage des frais de transport`
       : 'ShareAlp – Partage des frais de transport';
     syncUrl(state);
   }
