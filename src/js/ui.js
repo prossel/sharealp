@@ -74,7 +74,7 @@ const UI = (() => {
               Chef de course
             </label>
           </div>
-          <div class="field" style="flex:0;align-self:flex-end">
+          <div class="field" style="flex:0;align-self:center;padding-top: 1.2rem;">
             <button class="btn-primary" onclick="App.addParticipant()">Ajouter</button>
           </div>
         </div>
