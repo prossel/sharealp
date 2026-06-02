@@ -4,7 +4,7 @@ Web app pour répartir les frais de transport d'une course du [Club Alpin Suisse
 
 ## Utilisation
 
-Ouvrez [`index.html`](https://prossel.github.io/shareAlp/) directement dans le navigateur — aucun serveur requis.
+Ouvrez [`index.html`](https://prossel.github.io/sharealp/) directement dans le navigateur — aucun serveur requis.
 
 1. **Course** – saisissez la description, le nombre de kilomètres et le tarif CHF/km.
 2. **Participants** – ajoutez chaque membre avec son rôle (`Conducteur`, `Passager` ou `Indépendant`) et cochez le(s) chef(s) de course.
