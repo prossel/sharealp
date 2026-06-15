@@ -10,7 +10,7 @@ Ouvrez [`index.html`](https://prossel.github.io/sharealp/) directement dans le n
 2. **Participants** – ajoutez chaque membre avec son rôle (`Conducteur`, `Passager` ou `Indépendant`) et cochez le(s) chef(s) de course.
 3. **Résultats** – consultez les soldes et les virements minimaux à effectuer.
 
-Les données sont sauvegardées automatiquement dans le `localStorage` du navigateur.
+Les données sont sauvegardées automatiquement dans les données locales (`localStorage`) du navigateur. Aucune donnée n'est sauvegardée sur le serveur.
 
 Le bouton "Partager" génère une URL avec les données encodées, permettant de partager la course avec d'autres personnes.
 
